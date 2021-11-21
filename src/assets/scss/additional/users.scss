@@ -1,0 +1,17 @@
+.users{
+    &__table{
+        > div{
+            overflow-x: hidden;
+        }
+    }
+    &__table-row{
+        .chosen{
+            background-color: #525f7f;
+        }
+        cursor: pointer;
+    }
+    &__dropdown{
+        margin-bottom: 15px;
+    }
+    
+}

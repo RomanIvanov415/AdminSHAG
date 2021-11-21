@@ -15,12 +15,11 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, {createContext} from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 
-import AdminLayout from "layouts/Admin/Admin.js";
-import RTLLayout from "layouts/RTL/RTL.js";
+
 
 import "assets/scss/black-dashboard-react.scss";
 import "assets/demo/demo.css";
@@ -29,18 +28,39 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 
 import ThemeContextWrapper from "./components/ThemeWrapper/ThemeWrapper";
 import BackgroundColorWrapper from "./components/BackgroundColorWrapper/BackgroundColorWrapper";
+import userStore from "store/userStore";
+import categoryStore from "store/categoryStore";
+import brandStore from "store/brandStore";
+import clientStore from "store/clientStore";
+import orderStore from "store/orderStore";
+import productStore from "store/productStore";
+import userListStore from "store/userListStore";
+import reviewStore from "store/reviewStore";
+
+import Authorized from "routers/Authorized";
+
+
+export const Context = createContext(null);
 
 ReactDOM.render(
-  <ThemeContextWrapper>
+  <Context.Provider value={{
+    user: new userStore(),
+    category: new categoryStore(),
+    brand: new brandStore(),
+    client: new clientStore(),
+    order: new orderStore(),
+    product: new productStore(),
+    userList: new userListStore(),
+    review: new reviewStore()
+  }}>
+    <ThemeContextWrapper>
     <BackgroundColorWrapper>
       <BrowserRouter>
-        <Switch>
-          <Route path="/admin" render={(props) => <AdminLayout {...props} />} />
-          <Route path="/rtl" render={(props) => <RTLLayout {...props} />} />
-          <Redirect from="/" to="/admin/dashboard" />
-        </Switch>
+        <Authorized/>
       </BrowserRouter>
     </BackgroundColorWrapper>
-  </ThemeContextWrapper>,
+  </ThemeContextWrapper>
+  </Context.Provider>
+  ,
   document.getElementById("root")
 );

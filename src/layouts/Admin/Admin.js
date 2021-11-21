@@ -15,8 +15,9 @@
 * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 */
-import React from "react";
+import React, { useContext } from "react";
 import { Route, Switch, Redirect, useLocation } from "react-router-dom";
+import {observer} from "mobx-react-lite"
 // javascript plugin used to create scrollbars on windows
 import PerfectScrollbar from "perfect-scrollbar";
 
@@ -26,19 +27,33 @@ import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import FixedPlugin from "components/FixedPlugin/FixedPlugin.js";
 
-import routes from "routes.js";
+import {routes, authRoutes} from "routes.js";
+
+import {check} from '../../http/userAPI'
 
 import logo from "assets/img/react-logo.png";
 import { BackgroundColorContext } from "contexts/BackgroundColorContext";
+import { Context } from "index";
 
 var ps;
 
 function Admin(props) {
   const location = useLocation();
   const mainPanelRef = React.useRef(null);
+  const {user} = useContext(Context);
   const [sidebarOpened, setsidebarOpened] = React.useState(
     document.documentElement.className.indexOf("nav-open") !== -1
   );
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    check().then(data => {
+      user.setUser(true);
+      user.setIsAuth(true);
+    }).catch((e) => console.log(e.message))
+    .finally(() => setLoading(false))
+  }, [])
+
   React.useEffect(() => {
     if (navigator.platform.indexOf("Win") > -1) {
       document.documentElement.className += " perfect-scrollbar-on";
@@ -79,35 +94,67 @@ function Admin(props) {
     setsidebarOpened(!sidebarOpened);
   };
   const getRoutes = (routes) => {
-    return routes.map((prop, key) => {
-      if (prop.layout === "/admin") {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
-      } else {
-        return null;
-      }
-    });
+    if(user._isAuth){
+      return routes.map((prop, key) => {
+        if (prop.layout === "/admin") {
+          return (
+            <Route
+              path={prop.layout + prop.path}
+              component={prop.component}
+              key={key}
+            />
+          );
+        } else {
+          return null;
+        }
+      });
+    }
+    if(!user._isAuth){
+      return authRoutes.map((prop, key) => {
+        if (prop.layout === "/admin") {
+          return (
+            <Route
+              path={prop.layout + prop.path}
+              component={prop.component}
+              key={key}
+            />
+          );
+        } else {
+          return null;
+        }
+      });
+    }
   };
   const getBrandText = (path) => {
-    for (let i = 0; i < routes.length; i++) {
-      if (location.pathname.indexOf(routes[i].layout + routes[i].path) !== -1) {
-        return routes[i].name;
+    if(user._isAuth){
+      for (let i = 0; i < routes.length; i++) {
+        if (location.pathname.indexOf(routes[i].layout + routes[i].path) !== -1) {
+          return routes[i].name;
+        }
+      }
+    }
+    if(!user._isAuth){
+      for (let i = 0; i < authRoutes.length; i++) {
+        if (location.pathname.indexOf(authRoutes[i].layout + authRoutes[i].path) !== -1) {
+          return authRoutes[i].name;
+        }
       }
     }
     return "Brand";
   };
+
+  if(loading){
+    return(
+      <h1>Loading</h1>
+    )
+  }
   return (
     <BackgroundColorContext.Consumer>
       {({ color, changeColor }) => (
         <React.Fragment>
           <div className="wrapper">
             <Sidebar
-              routes={routes}
+              routes={user._isAuth ? routes : authRoutes}
               logo={{
                 outterLink: "https://www.creative-tim.com/",
                 text: "Creative Tim",
@@ -122,8 +169,8 @@ function Admin(props) {
                 sidebarOpened={sidebarOpened}
               />
               <Switch>
-                {getRoutes(routes)}
-                <Redirect from="*" to="/admin/dashboard" />
+                {getRoutes(user._isAuth ? routes : authRoutes)}
+                <Redirect from="*" to={user._isAuth ? "/admin/categories" : "/admin/authorization"} />
               </Switch>
               {
                 // we don't want the Footer to be rendered on map page
@@ -138,4 +185,4 @@ function Admin(props) {
   );
 }
 
-export default Admin;
+export default observer(Admin);

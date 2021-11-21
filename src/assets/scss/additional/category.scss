@@ -1,0 +1,20 @@
+.category{
+    &__product-table > div{
+        max-height: 450px;
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+    &__table > div{
+        overflow-x: hidden;
+    }
+    &__table-row{
+        cursor: pointer;
+        &.chosen{
+            background-color: #525f7f;
+        }
+        > td > img{
+            width: 50px;
+            height: 50px;
+        }
+    }
+}

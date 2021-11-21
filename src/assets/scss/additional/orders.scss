@@ -1,0 +1,16 @@
+.orders{
+    &__table{
+        &-row.chosen{
+            background-color: #525f7f;
+        }
+        > div{
+            overflow-x: hidden;
+        }
+    }
+    &__product-table{
+        > div{
+            max-height: 700px;
+            overflow-y: scroll;
+        }
+    }
+}
